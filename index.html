@@ -1080,6 +1080,7 @@ Each artwork needed to clearly communicate gameplay changes while remaining cons
                 folder: 'PUBGxNewjeans_Collaboration',
                 title: 'PUBG x NewJeans',
                 thumb: 'portfolio_images/PUBGxNewjeans_Collaboration/PUBGxNewjeans_Collaboration_001.webm',
+                thumbFallback: 'portfolio_images/PUBGxNewjeans_Collaboration/PUBGxNewjeans_Collaboration_thumb.png',
                 images: ["PUBGxNewjeans_Collaboration_001.png","PUBGxNewjeans_Collaboration_002.mp4","PUBGxNewjeans_Collaboration_002.png","PUBGxNewjeans_Collaboration_003.png","PUBGxNewjeans_Collaboration_004.png","PUBGxNewjeans_Collaboration_005.png","PUBGxNewjeans_Collaboration_006.png","PUBGxNewjeans_Collaboration_007.png"],
                 description: `This collaboration required careful alignment between PUBG's established game IP and NewJeans' distinct visual identity. The core challenge was achieving balance without allowing either brand to overpower the other.
 
@@ -1471,6 +1472,9 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
                 this.isContainerHovered = false; // 컨테이너 호버 상태
                 this.isItemHovered = false; // 개별 아이템 호버 상태
                 
+                // Safari 감지 (WebM 미지원 브라우저)
+                this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+                
                 this.init();
                 this.bindEvents();
                 this.animate();
@@ -1491,16 +1495,26 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
                     // 비디오 확장자 자동 감지 (.mp4, .webm, .mov)
                     const videoExtensions = ['.mp4', '.webm', '.mov'];
                     const thumbLower = project.thumb.toLowerCase();
+                    const isWebM = thumbLower.endsWith('.webm');
                     const isVideo = project.thumbType === 'video' || videoExtensions.some(ext => thumbLower.endsWith(ext));
                     
+                    // Safari에서 WebM인 경우 fallback 이미지 사용
+                    const useFallback = this.isSafari && isWebM && project.thumbFallback;
+                    
                     // Create image or video element
-                    if (isVideo) {
+                    if (isVideo && !useFallback) {
                         const video = document.createElement('video');
                         video.src = project.thumb;
                         video.autoplay = true;
                         video.muted = true;
                         video.loop = true;
                         video.playsInline = true;
+                        
+                        // WebM인 경우 poster 이미지 설정 (fallback)
+                        if (isWebM && project.thumbFallback) {
+                            video.poster = project.thumbFallback;
+                        }
+                        
                         element.appendChild(video);
                         
                         // 비디오는 메타데이터 로드 후 크기 조정
