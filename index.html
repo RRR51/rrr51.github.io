@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chang Ji Young - Portfolio</title>
     <style>
+        /* Violet Sans 폰트 로드 */
+        @font-face {
+            font-family: 'Violet Sans';
+            src: url('./Fonts/VioletSans-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
         :root {
             --bg-color: #0a0a0a;
             --text-color: #ffffff;
@@ -16,7 +25,7 @@
         }
         body, html {
             height: 100%;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-family: 'Violet Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             overflow: hidden;
@@ -179,6 +188,17 @@
             border-radius: 0px;
             box-shadow: 0 0px 0px rgba(0, 0, 0, 0.5);
             pointer-events: none;
+        }
+
+        /* 모든 비디오 컨트롤 숨김 */
+        video::-webkit-media-controls {
+            display: none !important;
+        }
+        video::-webkit-media-controls-enclosure {
+            display: none !important;
+        }
+        video::-webkit-media-controls-panel {
+            display: none !important;
         }
 
         /* 호버시 20% 확대 - JS에서 처리 */
@@ -387,7 +407,7 @@
         /* Grid Number Label */
         .grid-number {
             position: fixed;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-family: 'Violet Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
             font-size: 0.8rem;
             font-weight: 100;
             color: rgba(255, 255, 255, 0.8);
@@ -523,6 +543,7 @@
             pointer-events: none;
             transition: opacity 0.4s ease, visibility 0.4s ease;
             overflow: hidden;
+            font-family: 'Violet Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
         }
 
         .project-modal.active { 
@@ -673,6 +694,7 @@
         }
 
         .modal-project-description {
+            font-family: 'Violet Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
             font-size: 1rem;
             font-weight: 400;
             line-height: 1.8;
@@ -1072,8 +1094,10 @@ Each artwork needed to clearly communicate gameplay changes while remaining cons
             {
                 folder: 'PUBGxNewjeans_Collaboration',
                 title: 'PUBG x NewJeans',
-                thumb: 'portfolio_images/PUBGxNewjeans_Collaboration/PUBGxNewjeans_Collaboration_001.webm',
+                thumb: 'portfolio_images/PUBGxNewjeans_Collaboration/PUBGxNewjeans_Collaboration_001.webm', 
                 images: ["PUBGxNewjeans_Collaboration_002.mp4","PUBGxNewjeans_Collaboration_001.png","PUBGxNewjeans_Collaboration_002.png","PUBGxNewjeans_Collaboration_003.png","PUBGxNewjeans_Collaboration_004.png","PUBGxNewjeans_Collaboration_005.png","PUBGxNewjeans_Collaboration_006.png","PUBGxNewjeans_Collaboration_007.png","PUBGxNewjeans_Collaboration_010.mp4"],
+                thumbFallback: 'portfolio_images/PUBGxNewjeans_Collaboration/PUBGxNewjeans_Collaboration_thumb.png',
+                images: ["PUBGxNewjeans_Collaboration_001.png","PUBGxNewjeans_Collaboration_010.mp4","PUBGxNewjeans_Collaboration_002.mp4","PUBGxNewjeans_Collaboration_002.png","PUBGxNewjeans_Collaboration_003.png","PUBGxNewjeans_Collaboration_004.png","PUBGxNewjeans_Collaboration_005.png","PUBGxNewjeans_Collaboration_006.png","PUBGxNewjeans_Collaboration_007.png"],
                 description: `This collaboration required careful alignment between PUBG's established game IP and NewJeans' distinct visual identity. The core challenge was achieving balance without allowing either brand to overpower the other.
 
 Visual Decisions
@@ -1465,6 +1489,9 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
                 this.isContainerHovered = false; // 컨테이너 호버 상태
                 this.isItemHovered = false; // 개별 아이템 호버 상태
                 
+                // Safari 감지 (WebM 미지원 브라우저)
+                this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+                
                 this.init();
                 this.bindEvents();
                 this.animate();
@@ -1485,17 +1512,44 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
                     // 비디오 확장자 자동 감지 (.mp4, .webm, .mov)
                     const videoExtensions = ['.mp4', '.webm', '.mov'];
                     const thumbLower = project.thumb.toLowerCase();
+                    const isWebM = thumbLower.endsWith('.webm');
                     const isVideo = project.thumbType === 'video' || videoExtensions.some(ext => thumbLower.endsWith(ext));
                     
+                    // Safari에서 WebM인 경우 fallback 이미지 사용
+                    const useFallback = this.isSafari && isWebM && project.thumbFallback;
+                    
                     // Create image or video element
-                    if (isVideo) {
+                    if (isVideo && !useFallback) {
                         const video = document.createElement('video');
                         video.src = project.thumb;
                         video.autoplay = true;
                         video.muted = true;
                         video.loop = true;
                         video.playsInline = true;
+                        video.controls = false; // 재생바 숨김
+                        video.setAttribute('webkit-playsinline', 'true'); // iOS Safari용
+                        video.setAttribute('x5-playsinline', 'true'); // 일부 안드로이드용
+                        video.disablePictureInPicture = true;
+                        video.controlsList = 'nodownload nofullscreen noremoteplayback';
+                        
+                        // WebM인 경우 poster 이미지 설정 (fallback)
+                        if (isWebM && project.thumbFallback) {
+                            video.poster = project.thumbFallback;
+                        }
+                        
                         element.appendChild(video);
+                        
+                        // Safari 자동재생 강제 시도
+                        video.addEventListener('loadeddata', () => {
+                            const playPromise = video.play();
+                            if (playPromise !== undefined) {
+                                playPromise.catch(() => {
+                                    // 자동재생 실패 시 muted 확인 후 재시도
+                                    video.muted = true;
+                                    video.play().catch(() => {});
+                                });
+                            }
+                        });
                         
                         // 비디오는 메타데이터 로드 후 크기 조정
                         video.addEventListener('loadedmetadata', () => {
@@ -1503,7 +1557,8 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
                         });
                     } else {
                         const img = document.createElement('img');
-                        img.src = project.thumb;
+                        // Safari fallback인 경우 thumbFallback 사용, 아니면 기존 thumb 사용
+                        img.src = useFallback ? project.thumbFallback : project.thumb;
                         img.alt = project.title;
                         img.loading = 'lazy';
                         element.appendChild(img);
@@ -1590,12 +1645,43 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
                     this.mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
                 });
 
+                // 터치 스와이프 관련 변수
+                let touchStartX = 0;
+                let touchStartY = 0;
+                let touchEndX = 0;
+                let isSwiping = false;
+
+                // 터치 시작
+                document.addEventListener('touchstart', (e) => {
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                    isSwiping = true;
+                }, { passive: true });
+
+                // 터치 이동 중 - 실시간 회전
                 document.addEventListener('touchmove', (e) => {
+                    if (!isSwiping) return;
+                    
+                    const touchCurrentX = e.touches[0].clientX;
+                    const deltaX = touchCurrentX - touchStartX;
+                    
+                    // 스와이프 거리에 비례해서 회전 (감도 조절)
+                    this.targetRotationY += deltaX * 0.003;
+                    
+                    // 시작점 업데이트 (연속적인 회전을 위해)
+                    touchStartX = touchCurrentX;
+                    
+                    // 기존 마우스 위치 업데이트 로직
                     if (e.touches.length > 0) {
                         this.mouseX = (e.touches[0].clientX / window.innerWidth - 0.5) * 2;
                         this.mouseY = (e.touches[0].clientY / window.innerHeight - 0.5) * 2;
                     }
-                });
+                }, { passive: true });
+
+                // 터치 종료 - 관성 효과
+                document.addEventListener('touchend', (e) => {
+                    isSwiping = false;
+                }, { passive: true });
 
                 // 캐러셀 컨테이너 영역 호버 감지 (hero-3d 섹션 전체)
                 const heroSection = document.getElementById('hero3d');
@@ -1760,6 +1846,17 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
                     heroEl.muted = true;
                     heroEl.loop = true;
                     heroEl.playsInline = true;
+                    heroEl.controls = false;
+                    heroEl.setAttribute('webkit-playsinline', 'true');
+                    heroEl.setAttribute('x5-playsinline', 'true');
+                    heroEl.disablePictureInPicture = true;
+                    // Safari 자동재생 강제
+                    heroEl.addEventListener('loadeddata', function() {
+                        heroEl.play().catch(function() {
+                            heroEl.muted = true;
+                            heroEl.play().catch(function() {});
+                        });
+                    });
                 } else {
                     heroEl = document.createElement('img');
                     heroEl.src = 'portfolio_images/' + project.folder + '/' + firstImgName;
@@ -1793,6 +1890,17 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
                             el.muted = true;
                             el.loop = true;
                             el.playsInline = true;
+                            el.controls = false;
+                            el.setAttribute('webkit-playsinline', 'true');
+                            el.setAttribute('x5-playsinline', 'true');
+                            el.disablePictureInPicture = true;
+                            // Safari 자동재생 강제
+                            el.addEventListener('loadeddata', function() {
+                                el.play().catch(function() {
+                                    el.muted = true;
+                                    el.play().catch(function() {});
+                                });
+                            });
                         } else {
                             el = document.createElement('img');
                             el.src = 'portfolio_images/' + project.folder + '/' + imgName;
@@ -1822,6 +1930,17 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
                         el.muted = true;
                         el.loop = true;
                         el.playsInline = true;
+                        el.controls = false;
+                        el.setAttribute('webkit-playsinline', 'true');
+                        el.setAttribute('x5-playsinline', 'true');
+                        el.disablePictureInPicture = true;
+                        // Safari 자동재생 강제
+                        el.addEventListener('loadeddata', function() {
+                            el.play().catch(function() {
+                                el.muted = true;
+                                el.play().catch(function() {});
+                            });
+                        });
                     } else {
                         el = document.createElement('img');
                         el.src = 'portfolio_images/' + project.folder + '/' + imgName;
