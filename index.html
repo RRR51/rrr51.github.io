@@ -1832,6 +1832,11 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
         const modalYear = document.getElementById('modalYear');
 
         function openModal(project) {
+            // Deep link: URL hash 업데이트 (공유 가능한 링크용)
+            if (project.folder && location.hash.replace(/^#/, '') !== project.folder) {
+                history.replaceState(null, '', '#' + project.folder);
+            }
+
             modalTitle.textContent = project.title;
             modalDescription.textContent = project.description;
             modalRole.textContent = project.role || 'Design';
@@ -2032,6 +2037,10 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
         function closeModal() {
             projectModal.classList.remove('active');
             body.classList.remove('modal-open');
+            // Deep link: hash 제거 (히스토리에 남기지 않음)
+            if (location.hash) {
+                history.replaceState(null, '', location.pathname + location.search);
+            }
         }
 
         // Keyboard controls
@@ -2046,6 +2055,26 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
         // ========================================
         const carouselContainer = document.getElementById('carouselContainer');
         const carousel = new Carousel3D(carouselContainer, carouselConfig, projectData);
+
+        // ========================================
+        // DEEP LINK (URL hash → 프로젝트 모달 자동 오픈)
+        // 예: https://rrr51.github.io/#PUBGxNewjeans_Collaboration
+        // ========================================
+        function openProjectFromHash() {
+            const hash = decodeURIComponent(location.hash.replace(/^#/, ''));
+            if (!hash) return;
+            const project = projectData.find(function(p) { return p.folder === hash; });
+            if (project) openModal(project);
+        }
+        openProjectFromHash();
+        window.addEventListener('hashchange', function() {
+            if (!location.hash) {
+                projectModal.classList.remove('active');
+                body.classList.remove('modal-open');
+            } else {
+                openProjectFromHash();
+            }
+        });
 
         // ========================================
         // AXIS INDICATOR CONTROL
