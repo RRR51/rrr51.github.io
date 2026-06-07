@@ -743,6 +743,13 @@
             object-fit: contain;
         }
 
+        .gallery-row .gallery-item iframe {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            display: block;
+            border: 0;
+        }
+
         /* 1단 레이아웃 - 항상 100% */
         .gallery-row.cols-1 .gallery-item {
             flex: 0 0 100%;
@@ -1220,7 +1227,7 @@ Custom Chinese calligraphy was created in collaboration with calligrapher Lee Gy
                     { images: ["slide_11.png"] },
                     { images: ["slide_12.png"] },
                     { images: ["slide_13.png"] },
-                    { images: ["slide_14.png"] },
+                    { images: ["https://vimeo.com/896997498/08646992fe"] },
                     { images: ["RONDO_005.jpg", "RONDO_006.jpg"] },
                     { images: ["RONDO_007.jpg"] },
                     { images: ["RONDO_008.jpg", "RONDO_009.jpg"] },
@@ -1954,10 +1961,20 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
                     row.images.forEach(function(imgName) {
                         const itemEl = document.createElement('div');
                         itemEl.className = 'gallery-item';
-                        
+
+                        const vimeoMatch = imgName.match(/^https?:\/\/(?:www\.)?vimeo\.com\/(\d+)(?:\/([a-z0-9]+))?/i);
                         const isVideo = imgName.endsWith('.mp4');
+                        const isEmbed = !!vimeoMatch;
                         let el;
-                        if (isVideo) {
+                        if (isEmbed) {
+                            el = document.createElement('iframe');
+                            const videoId = vimeoMatch[1];
+                            const hash = vimeoMatch[2];
+                            el.src = 'https://player.vimeo.com/video/' + videoId + (hash ? '?h=' + hash : '');
+                            el.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture');
+                            el.setAttribute('allowfullscreen', 'true');
+                            el.setAttribute('loading', 'lazy');
+                        } else if (isVideo) {
                             el = document.createElement('video');
                             el.src = 'portfolio_images/' + project.folder + '/' + imgName;
                             el.autoplay = true;
@@ -1982,7 +1999,7 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
                         }
                         itemEl.appendChild(el);
                         rowEl.appendChild(itemEl);
-                        items.push({ element: itemEl, media: el, isVideo: isVideo });
+                        items.push({ element: itemEl, media: el, isVideo: isVideo, isEmbed: isEmbed });
                     });
                     
                     galleryContainer.appendChild(rowEl);
