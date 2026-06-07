@@ -1969,7 +1969,9 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
                             el = document.createElement('iframe');
                             const videoId = vimeoMatch[1];
                             const hash = vimeoMatch[2];
-                            el.src = 'https://player.vimeo.com/video/' + videoId + (hash ? '?h=' + hash : '');
+                            const params = ['autoplay=1', 'muted=1', 'loop=1'];
+                            if (hash) params.unshift('h=' + hash);
+                            el.src = 'https://player.vimeo.com/video/' + videoId + '?' + params.join('&');
                             el.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture');
                             el.setAttribute('allowfullscreen', 'true');
                             el.setAttribute('loading', 'lazy');
