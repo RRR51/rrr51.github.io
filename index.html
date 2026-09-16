@@ -1550,8 +1550,8 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
 
         const carouselConfig = {
             radius: getResponsiveRadius(),
-            autoRotateSpeed: 0.0004,
-            fastRotateSpeed: 0.0025, // 2배 빠른 속도
+            autoRotateSpeed: 0.0008,
+            fastRotateSpeed: 0.005,
             mouseInfluence: 0.0002,
             verticalTilt: -5
         };
@@ -1621,6 +1621,7 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
                         if (isWebM && project.thumbFallback) {
                             video.poster = project.thumbFallback;
                         }
+
                         
                         element.appendChild(video);
                         
