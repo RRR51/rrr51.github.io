@@ -1105,6 +1105,7 @@ The collaboration single title was teased as a poster to open the campaign, then
                 folder: 'PUBGxNewjeans_Collaboration',
                 title: 'PUBGxNewJeans',
                 thumb: 'portfolio_images/PUBGxNewjeans_Collaboration/PUBGxNewjeans_Collaboration_001.gif',
+                sizeScale: 1.3,
                 images: ["PUBGxNewjeans_Collaboration_002.jpg","PUBGxNewjeans_Collaboration_002.mp4","slide_02.jpg","PUBGxNewjeans_Collaboration_001.jpg","slide_05.jpg","PUBGxNewjeans_Collaboration_010.mp4","slide_08.jpg","slide_09.jpg","slide_10.jpg","slide_11.jpg","slide_07.jpg","PUBGxNewjeans_Collaboration_006.jpg","PUBGxNewjeans_Collaboration_005.jpg","PUBGxNewjeans_Collaboration_004.jpg","PUBGxNewjeans_Collaboration_003.jpg","PUBGxNewjeans_Collaboration_007.jpg","slide_12.jpg"],
                 description: `This collaboration required careful alignment between PUBG's established game IP and NewJeans' distinct visual identity. The core challenge was achieving balance without allowing either brand to overpower the other.
 
@@ -1638,7 +1639,7 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
                         
                         // 비디오는 메타데이터 로드 후 크기 조정
                         video.addEventListener('loadedmetadata', () => {
-                            this.adjustElementSize(element, video.videoWidth, video.videoHeight);
+                            this.adjustElementSize(element, video.videoWidth, video.videoHeight, project.sizeScale || 1);
                         });
                     } else {
                         const img = document.createElement('img');
@@ -1650,7 +1651,7 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
                         
                         // 이미지 로드 후 실제 비율에 맞게 크기 조정
                         img.addEventListener('load', () => {
-                            this.adjustElementSize(element, img.naturalWidth, img.naturalHeight);
+                            this.adjustElementSize(element, img.naturalWidth, img.naturalHeight, project.sizeScale || 1);
                         });
                     }
                     
@@ -1695,13 +1696,13 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
             }
 
             // 이미지/비디오 실제 비율에 맞게 요소 크기 조정
-            adjustElementSize(element, naturalWidth, naturalHeight) {
+            adjustElementSize(element, naturalWidth, naturalHeight, scale = 1) {
                 const maxWidth = 300; // 최대 너비
                 const maxHeight = 400; // 최대 높이
                 const aspectRatio = naturalWidth / naturalHeight;
-                
+
                 let width, height;
-                
+
                 if (aspectRatio > 1) {
                     // 가로형 이미지
                     width = Math.min(maxWidth, naturalWidth);
@@ -1719,8 +1720,8 @@ A new-tro aesthetic inspired by hand-painted theater signage was used to establi
                         height = width / aspectRatio;
                     }
                 }
-                
-                element.style.width = `${width}px`;
+
+                element.style.width = `${width * scale}px`;
                 element.style.height = 'auto';
             }
 
